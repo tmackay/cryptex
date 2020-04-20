@@ -117,11 +117,9 @@ if(part=="shell"||part==undef){
         intersection(){
             translate([0,0,w])rotate_extrude()
                 polygon(points=[[0,2*layer_h],[d/2-2*w,2*layer_h],[d/2-2*w+t,t+2*layer_h],[d/2-2*w+t,box_h],[0,box_h]]);
-            
             for(i=[0:len(a)-1])linear_extrude(box_h,twist=twist)mir()rotate([0,0,a[i]*2])
                 translate([d/2-2*w+outer_w/2,0,0])scale([2,1,1])
                     square(outer_w+4*tol,center=true);
-
         }
         // false teeth
         intersection(){
@@ -162,12 +160,11 @@ if(part=="shell"||part==undef){
             for (i=[0:n+1],j=[0:len(chars[i])-1])rotate([0,0,j*360/len(chars[i])-180/len(chars[i])])
                 translate([-d/2-tol-(raised_dials?h/5:0),0,h/2+i*(h+sp)-(i>0?(i>n?2*sp:sp):0)])
                     translate([0,-tol,-h/2])cube([char_thickness+tol,2*tol,h]);
-            
         // magnets 
         if(magnets)for(i=[0:len(gaps)-1])if(3*delta[i]>4*magnet_d)
-            for(j=[-floor((delta[i]-magnet_d/2)/magnet_d/2)/2:floor((delta[i]-magnet_d/2)/magnet_d/2)/2])
+            let(de=(delta[i]-magnet_d/2)/magnet_d/2,def=floor(de))for(j=[-def/2:def/2])
                 rotate([0,0,-twist*(w+layer_h+magnet_d/2)/box_h])
-                    mir()rotate([0,0,gaps[i]+j*magnet_d/PI/(d/2-2*w)*360])
+                    mir()rotate([0,0,gaps[i]+j*magnet_d/PI/(d/2-2*w)*360*(def?de/def:1)])
                         translate([d/2-2*w+magnet_h+tol,0,w+magnet_d/2+tol])
                             mirror([1,0,1])cylinder(d=magnet_d+2*tol,h=magnet_h+s+2*tol,$fn=24);
         // temporary sections
@@ -228,9 +225,9 @@ if(part=="core"||part==undef){
         cylinder(d=d-6*w-4*tol,h=box_h-w);
         // magnets 
         if(magnets)for(i=[0:len(gaps)-1])if(3*delta[i]>4*magnet_d)
-            for(j=[-floor((delta[i]-magnet_d/2)/magnet_d/2)/2:floor((delta[i]-magnet_d/2)/magnet_d/2)/2])
+            let(de=(delta[i]-magnet_d/2)/magnet_d/2,def=floor(de))for(j=[-def/2:def/2])
                 rotate([0,0,-twist*magnet_d/2/box_h])
-                    mir()rotate([0,0,gaps[i]+j*magnet_d/PI/(d/2-2*w)*360])
+                    mir()rotate([0,0,gaps[i]+j*magnet_d/PI/(d/2-2*w)*360*(def?de/def:1)])
                         translate([d/2-2.5*w-tol,0,w+magnet_d/2+tol+4*layer_h])
                             mirror([1,0,1])cylinder(d=magnet_d+2*tol,h=magnet_h+s+2*tol,$fn=24);
         // temporary sections
@@ -247,23 +244,14 @@ module mir(){
     mirror([0,1,0])children();
 }
 
-function quicksort(arr) =
-  !(len(arr)>0) ? [] :
-      let(  pivot   = arr[floor(len(arr)/2)],
-            lesser  = [ for (y = arr) if (y  < pivot) y ],
-            equal   = [ for (y = arr) if (y == pivot) y ],
-            greater = [ for (y = arr) if (y  > pivot) y ]
-      )
-      concat( quicksort(lesser), equal, quicksort(greater) );
+function quicksort(arr) = !(len(arr)>0)?[]:
+    let(pivot = arr[floor(len(arr)/2)],
+        lesser = [for (y = arr) if(y < pivot) y],
+        equal = [for (y = arr) if(y == pivot) y],
+        greater = [for (y = arr) if(y > pivot) y]
+    )concat(quicksort(lesser),equal,quicksort(greater));
 
-function substr(s, st, en, p="") =
-    (st >= en || st >= len(s))
-        ? p
-        : substr(s, st+1, en, str(p, s[st]));
+function substr(s,st,en,p="") = (st>=en||st>=len(s))?p:substr(s,st+1,en,str(p,s[st]));
 
-function split(h, s, p=[]) =
-    let(x = search(h, s)) 
-    x == []
-        ? concat(p, s)
-        : let(i=x[0], l=substr(s, 0, i), r=substr(s, i+1, len(s)))
-                split(h, r, concat(p, l));
+function split(h,s,p=[]) = let(x=search(h,s))x==[]?concat(p,s):
+    let(i=x[0],l=substr(s,0,i),r=substr(s,i+1,len(s)))split(h,r,concat(p,l));
