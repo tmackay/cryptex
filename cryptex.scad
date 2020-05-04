@@ -90,8 +90,6 @@ echo(str("total box height: ",box_h));
 echo(str("internal diameter: ",d-6*w-4*tol));
 echo(str("internal height: ",box_h-2*w-2*layer_h));
 
-//d=d-6*w-4*tol,h=box_h-w
-
 // find gaps to insert magnets/false teeth
 a=quicksort([for(j = [0:outer_t/2])j*180/outer_t,for(j = [0:outer_t2/2])(-j*180/outer_t2+90)%180]);
 delta=[for(i=[1:len(a)-1])a[i]-a[i-1]]*PI*(d/2-2*w)/180;
