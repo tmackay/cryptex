@@ -17,7 +17,7 @@ raised_dials = 1; // [1:Yes , 0:No]
 
 // Array of characters, first character in each row is key, rest is filler in no particular order
 // watch out the seams don't give it away... (onlinerandomtools.com/shuffle-letters)
-charinput="DiTcanNotbESEENCANNOTbEfeltcAnnOtBeHeAr,ARSaNDuNdECannOtbesMeLtiTlIEsbehINdSt,RhILlsAndeMPtYHOLESiTfillsitCOmESoutfi,KILLslAUghtERRsTaNDfoLlowSafteRENdslIfe";
+charinput="325614,643152,514263,236541,451326,162435"; // 6x6 Sudoku
 
 // Font used for all rows
 font = "Liberation Mono:style=Bold";
@@ -25,12 +25,12 @@ font = "Liberation Mono:style=Bold";
 // Overall scale (to avoid small numbers, internal faces or non-manifold edges)
 s = 1000;
 
-// height of layers
-h_ = 8.5;
+// height of ring/collars
+h_ = 12.5;
 h=s*h_;
 
 // thickness of spacers
-sp_ = 1;
+sp_ = 0;
 sp=s*sp_;
 
 // Depth of embossed characters
@@ -38,23 +38,23 @@ char_thickness_ = 0.5;
 char_thickness = s*char_thickness_;
 
 // outer diameter of box
-d_ = 50;
+d_ = 30;
 d=s*d_;
 
 // wall thickness
-w_ = 2.5;
+w_ = 3.6;
 w = s*w_;
 
 // teeth depth
-t_ = 3.2;
+t_ = 4.8;
 t=s*t_;
 
 // Outer teeth
-outer_t = 5; //[0:1:24]
+outer_t = 3; //[0:1:24]
 // Outer teeth
-outer_t2 = 7; //[0:1:24]
+outer_t2 = 5; //[0:1:24]
 // Width of outer teeth
-outer_w_=2.1; //[0:0.1:10]
+outer_w_=2.6; //[0:0.1:10]
 outer_w=s*outer_w_;
 // Taper top teeth (not sure if this helps resist shimming or makes it easier to get a loop of floss around the core)
 taper = 1; // [1:Yes , 0:No]
@@ -62,7 +62,7 @@ taper = 1; // [1:Yes , 0:No]
 twist = 0; // [0:720]
 
 // embedded magnets, open with a sudden stop
-magnets = 1; // [1:Yes , 0:No]
+magnets = 0; // [1:Yes , 0:No]
 // Magnet diameter
 magnet_d_ = 6; //[0:0.1:10]
 magnet_d = s*magnet_d_;
@@ -71,8 +71,8 @@ magnet_h_ = 3; //[0:0.1:10]
 magnet_h = s*magnet_h_;
 
 // clearance
-tol_=0.2; //[0:0.01:0.5]
-tol=s*tol_;
+tol_=0.4; //[0:0.1:1.0]
+tol=s*tol_/2;
 
 // Layer height (for ring horizontal split)
 layer_h_ = 0.2; //[0:0.01:1]
@@ -87,6 +87,10 @@ chars = split(",",charinput); // workaround for customizer
 n = len(chars)-2;
 box_h=(n-1)*sp+(n+2)*h;
 echo(str("total box height: ",box_h));
+echo(str("internal diameter: ",d-6*w-4*tol));
+echo(str("internal height: ",box_h-2*w-2*layer_h));
+
+//d=d-6*w-4*tol,h=box_h-w
 
 // find gaps to insert magnets/false teeth
 a=quicksort([for(j = [0:outer_t/2])j*180/outer_t,for(j = [0:outer_t2/2])(-j*180/outer_t2+90)%180]);
@@ -107,8 +111,8 @@ if(part=="shell"||part==undef){
         // internal void
         translate([0,0,w])cylinder(d=d-4*w,h=box_h);
         // top taper
-        translate([0,0,box_h-s])cylinder(d=d-4*w+6*tol+2*t,h=s);
-        translate([0,0,box_h-s-t])cylinder(d1=d-4*w,d2=d-4*w+6*tol+2*t,h=t);
+        translate([0,0,box_h-s])cylinder(d=d-4*w+8*tol+2*t,h=s);
+        translate([0,0,box_h-s-t])cylinder(d1=d-4*w,d2=d-4*w+8*tol+2*t,h=t);
         // code wheel cutout
         for (i=[0:n-1])translate([0,0,h+i*(h+sp)])rotate_extrude()
             polygon(points=[[d/2,h],[d/2-3*tol,h],[d/2-t-2*tol,h-t],[d/2-t-2*tol,t],[d/2-3*tol,0],[d/2,0],
@@ -118,19 +122,19 @@ if(part=="shell"||part==undef){
             translate([0,0,w])rotate_extrude()
                 polygon(points=[[0,2*layer_h],[d/2-2*w,2*layer_h],[d/2-2*w+t,t+2*layer_h],[d/2-2*w+t,box_h],[0,box_h]]);
             for(i=[0:len(a)-1])linear_extrude(box_h,twist=twist)mir()rotate([0,0,a[i]*2])
-                translate([d/2-2*w+outer_w/2,0,0])scale([2,1,1])
-                    square(outer_w+4*tol,center=true);
+                translate([d/2-2*w+t/2,0,0])
+                    square([t+4*tol,outer_w+4*tol],center=true);
         }
         // false teeth
-        intersection(){
+        if(max([for(i=[0:len(a)-1])(3*delta[i]>4*outer_w)?1:0]))intersection(){
             translate([0,0,w])rotate_extrude()
                 polygon(points=[[0,h+(n-1)*(h+sp)+h/2],[d/2-2*w,h+(n-1)*(h+sp)+h/2],[d/2-2*w+t,t+h+(n-1)*(h+sp)+h/2],[d/2-2*w+t,box_h],[0,box_h]]);
             for(i=[0:len(gaps)-1])if(3*delta[i]>4*outer_w)
                 let(de=(delta[i]-outer_w)/outer_w/2,def=floor(de))for(j=[-def/2:def/2])
                     linear_extrude(box_h,twist=twist)
                         mir()rotate([0,0,gaps[i]+j*outer_w/PI/(d/2-2*w)*360*(def?de/def:1)])
-                            translate([d/2-2*w+outer_w/2,0,0])scale([2,1,1])
-                                square(outer_w+4*tol,center=true);
+                            translate([d/2-2*w+t/2,0,0])
+                                square([t+4*tol,outer_w+4*tol],center=true);
         }
         // false gates
         intersection(){
@@ -147,21 +151,23 @@ if(part=="shell"||part==undef){
                         scale([2,1,1])square(outer_w+4*tol,center=true);
         }
         // codex
-        if(codex)rotate([0,0,-60])
+        if(codex)rotate([0,0,-60])difference(){
             for (i=[0:n+1],j=[0:len(chars[i])-1])rotate([0,0,j*360/len(chars[i])])
                 translate([-d/2-tol-(raised_dials?h/5:0),0,h/2+i*(h+sp)-(i>0?(i>n?2*sp:sp):0)])mirror([1,0,-1])
-                    linear_extrude(char_thickness+tol)scale(0.8*PI*d/len(chars[i])/10)text(
+                    linear_extrude(2*char_thickness+tol)scale(min(0.8*PI*d/len(chars[i]),3*h/5)/10)text(
                         chars[i][j],font=font,
                         size=10,$fn=4,
                         valign="center",halign="center"
                     );
+            cylinder(d=(raised_dials?d+2*h/5:d)-2*char_thickness,h=box_h);
+        }
         // notches
         if(notches)rotate([0,0,-60])
             for (i=[0:n+1],j=[0:len(chars[i])-1])rotate([0,0,j*360/len(chars[i])-180/len(chars[i])])
                 translate([-d/2-tol-(raised_dials?h/5:0),0,h/2+i*(h+sp)-(i>0?(i>n?2*sp:sp):0)])
                     translate([0,-tol,-h/2])cube([char_thickness+tol,2*tol,h]);
         // magnets 
-        if(magnets)for(i=[0:len(gaps)-1])if(3*delta[i]>4*magnet_d)
+        if(magnets)for(i=[0:len(gaps)-1])if(delta[i]>magnet_d)
             let(de=(delta[i]-magnet_d/2)/magnet_d/2,def=floor(de))for(j=[-def/2:def/2])
                 rotate([0,0,-twist*(w+layer_h+magnet_d/2)/box_h])
                     mir()rotate([0,0,gaps[i]+j*magnet_d/PI/(d/2-2*w)*360*(def?de/def:1)])
@@ -171,20 +177,23 @@ if(part=="shell"||part==undef){
         if(section){
             cube(box_h);
             mirror([1,1,0])rotate([0,0,gaps[0]])cube(box_h);
-            cylinder(d=d/2,h=box_h);
+            cylinder(d=tol,h=box_h);
         }
     }
 }
 
 // if trouble with non-manifold geometry, generate text separately and subtract using TinkerCad
 if(part=="codex"){
-    rotate([0,0,-60])for (i=[0:n+1],j=[0:len(chars[i])-1])rotate([0,0,j*360/len(chars[i])])
-        translate([-d/2-tol,0,h/2+i*(h+sp)-(i>0?(i>n?2*sp:sp):0)])mirror([1,0,-1])
-            linear_extrude(char_thickness+tol)scale(0.8*PI*d/len(chars[i])/10)text(
-                chars[i][j],font=font,
-                size=10,$fn=4,
-                valign="center",halign="center"
-            );
+    rotate([0,0,-60])difference(){
+        for (i=[0:n+1],j=[0:len(chars[i])-1])rotate([0,0,j*360/len(chars[i])])
+            translate([-d/2-tol-(raised_dials?h/5:0),0,h/2+i*(h+sp)-(i>0?(i>n?2*sp:sp):0)])mirror([1,0,-1])
+                linear_extrude(2*char_thickness+tol)scale(min(0.8*PI*d/len(chars[i]),3*h/5)/10)text(
+                    chars[i][j],font=font,
+                    size=10,$fn=4,
+                    valign="center",halign="center"
+                );
+        cylinder(d=(raised_dials?d+2*h/5:d)-2*char_thickness,h=box_h);
+    }
 }
 
 // Core
@@ -194,19 +203,19 @@ if(part=="core"||part==undef){
             // cylinder
             cylinder(d=d-4*w-4*tol,h=box_h-w-layer_h);
             // top taper
-            translate([0,0,box_h-w-layer_h-s])cylinder(d=d-4*w+2*t+2*tol,h=s);
-            translate([0,0,box_h-w-layer_h-s-t])cylinder(d1=d-4*w-4*tol,d2=d-4*w+2*t+2*tol,h=t);
+            translate([0,0,box_h-w-layer_h-s])cylinder(d=d-4*w+2*t+4*tol,h=s);
+            translate([0,0,box_h-w-layer_h-s-t])cylinder(d1=d-4*w-4*tol,d2=d-4*w+2*t+4*tol,h=t);
             // outer teeth
             intersection(){
                 rotate_extrude()
                     polygon(points=[[d/2-2*w-2*tol,2*layer_h],[d/2-2*w-2*tol+t,t+2*layer_h],
                 [d/2-2*w-2*tol+t,box_h-taper*(w+3*layer_h+s+2*t)],[d/2-2*w-2*tol,box_h-taper*(w+3*layer_h+s+t)]]);
                 for(i=[0:len(a)-1])linear_extrude(box_h,twist=twist)
-                    mir()rotate([0,0,a[i]*2])translate([d/2-2*w+outer_w/2,0,0])
-                        scale([2,1,1])square(outer_w,center=true);
+                    mir()rotate([0,0,a[i]*2])translate([d/2-2*w-2*tol+t/2,0,0])
+                        square([t+2*tol,outer_w],center=true);
             }
             // false teeth
-            intersection(){
+            if(max([for(i=[0:len(a)-1])(3*delta[i]>4*outer_w)?1:0]))intersection(){
                 rotate_extrude()
                     polygon(points=[[d/2-2*w-2*tol,h+(n-1)*(h+sp)+h/2],[d/2-2*w-2*tol+t,t+h+(n-1)*(h+sp)+h/2],
                         [d/2-2*w-2*tol+t,box_h-w-layer_h],[d/2-2*w-2*tol,box_h-w-layer_h]]);
@@ -214,8 +223,8 @@ if(part=="core"||part==undef){
                     let(de=(delta[i]-outer_w)/outer_w/2,def=floor(de))for(j=[-def/2:def/2])
                         linear_extrude(box_h,twist=twist)mir()
                             rotate([0,0,gaps[i]+j*outer_w/PI/(d/2-2*w)*360*(def?de/def:1)])
-                                translate([d/2-2*w+outer_w/2,0,0])
-                                    scale([2,1,1])square(outer_w,center=true);
+                                translate([d/2-2*w-2*tol+t/2,0,0])
+                                    square([t+2*tol,outer_w],center=true);
             }
         }
         // code wheel cutout - more clearance than shell otherwise we can feel the change in friction
@@ -224,7 +233,7 @@ if(part=="core"||part==undef){
         // payload
         cylinder(d=d-6*w-4*tol,h=box_h-w);
         // magnets 
-        if(magnets)for(i=[0:len(gaps)-1])if(3*delta[i]>4*magnet_d)
+        if(magnets)for(i=[0:len(gaps)-1])if(delta[i]>magnet_d)
             let(de=(delta[i]-magnet_d/2)/magnet_d/2,def=floor(de))for(j=[-def/2:def/2])
                 rotate([0,0,-twist*magnet_d/2/box_h])
                     mir()rotate([0,0,gaps[i]+j*magnet_d/PI/(d/2-2*w)*360*(def?de/def:1)])
@@ -234,7 +243,7 @@ if(part=="core"||part==undef){
         if(section){
             cube(box_h);
             mirror([1,1,0])rotate([0,0,gaps[0]])cube(box_h);
-            cylinder(d=d/2,h=box_h);
+            cylinder(d=tol,h=box_h);
         }
     }    
 }
