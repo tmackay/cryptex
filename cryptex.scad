@@ -146,8 +146,8 @@ if(part=="shell"||part==undef){
                 ]);
             if(outer_t2>0)for(i=[1:outer_t-1],j=[0:outer_t2-1])
                 linear_extrude(box_h,twist=twist)
-                    rotate([0,0,i*360/outer_t+j*360/outer_t2-180])translate([d/2-2*w+outer_w/2,0,0])
-                        scale([2,1,1])square(outer_w+4*tol,center=true);
+                    rotate([0,0,i*360/outer_t+j*360/outer_t2-180])translate([d/2-2*w+t/2,0,0])
+                        square([t+4*tol,outer_w+4*tol],center=true);
         }
         // codex
         if(codex)rotate([0,0,-60])difference(){
@@ -207,8 +207,8 @@ if(part=="core"||part==undef){
             // outer teeth
             intersection(){
                 rotate_extrude()
-                    polygon(points=[[d/2-2*w-2*tol,2*layer_h],[d/2-2*w-2*tol+t,t+2*layer_h],
-                [d/2-2*w-2*tol+t,box_h-taper*(w+3*layer_h+s+2*t)],[d/2-2*w-2*tol,box_h-taper*(w+3*layer_h+s+t)]]);
+                    polygon(points=[[0,2*layer_h],[d/2-2*w-2*tol,2*layer_h],[d/2-2*w-2*tol+t,t+2*layer_h],
+                [d/2-2*w-2*tol+t,box_h-taper*(w+3*layer_h+s+2*t)],[d/2-2*w-2*tol,box_h-taper*(w+3*layer_h+s+t)],[0,box_h-taper*(w+3*layer_h+s+t)]]);
                 for(i=[0:len(a)-1])linear_extrude(box_h,twist=twist)
                     mir()rotate([0,0,a[i]*2])translate([d/2-2*w-2*tol+t/2,0,0])
                         square([t+2*tol,outer_w],center=true);
@@ -216,8 +216,8 @@ if(part=="core"||part==undef){
             // false teeth
             if(max([for(i=[0:len(a)-1])(3*delta[i]>4*outer_w)?1:0]))intersection(){
                 rotate_extrude()
-                    polygon(points=[[d/2-2*w-2*tol,h+(n-1)*(h+sp)+h/2],[d/2-2*w-2*tol+t,t+h+(n-1)*(h+sp)+h/2],
-                        [d/2-2*w-2*tol+t,box_h-w-layer_h],[d/2-2*w-2*tol,box_h-w-layer_h]]);
+                    polygon(points=[[0,h+(n-1)*(h+sp)+h/2],[d/2-2*w-2*tol,h+(n-1)*(h+sp)+h/2],[d/2-2*w-2*tol+t,t+h+(n-1)*(h+sp)+h/2],
+                        [d/2-2*w-2*tol+t,box_h-w-layer_h],[d/2-2*w-2*tol,box_h-w-layer_h],[0,box_h-w-layer_h]]);
                 for(i=[0:len(a)-1])if(3*delta[i]>4*outer_w)
                     let(de=(delta[i]-outer_w)/outer_w/2,def=floor(de))for(j=[-def/2:def/2])
                         linear_extrude(box_h,twist=twist)mir()
