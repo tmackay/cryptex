@@ -89,7 +89,7 @@ n = len(chars)-2;
 box_h=(n-1)*sp+(n+2)*h;
 echo(str("total box height: ",box_h));
 echo(str("internal diameter: ",d-6*w-4*tol));
-echo(str("internal height: ",box_h-2*w-2*layer_h));
+echo(str("internal height: ",box_h-2*wall_thickness*s-2*layer_h));
 
 // find gaps to insert magnets/false teeth
 a=quicksort([for(j = [0:outer_t/2])j*180/outer_t,for(j = [0:outer_t2/2])(-j*180/outer_t2+90)%180]);
@@ -108,7 +108,7 @@ if(part=="shell"||part==undef){
                     polygon(points=[[d/2,h-tol],[d/2+h/5,h-h/5],[d/2+h/5,h/5],[d/2,tol]]);
         }
         // internal void
-        translate([0,0,w])cylinder(d=d-4*w,h=box_h);
+        translate([0,0,wall_thickness*s])cylinder(d=d-4*w,h=box_h);
         // top taper
         translate([0,0,box_h-s])cylinder(d=d-4*w+8*tol+2*t,h=s);
         translate([0,0,box_h-s-t])cylinder(d1=d-4*w,d2=d-4*w+8*tol+2*t,h=t);
@@ -118,7 +118,7 @@ if(part=="shell"||part==undef){
              [d/2,layer_h],[d/2-layer_h-tol,layer_h],[d/2-t,t],[d/2-t,h-t],[d/2-tol-layer_h,h-layer_h],[d/2,h-layer_h]]);
         // outer teeth
         intersection(){
-            translate([0,0,w])rotate_extrude()
+            translate([0,0,wall_thickness*s])rotate_extrude()
                 polygon(points=[[0,2*layer_h],[d/2-2*w,2*layer_h],[d/2-2*w+t,t+2*layer_h],[d/2-2*w+t,box_h],[0,box_h]]);
             for(i=[0:len(a)-1])linear_extrude(box_h,twist=twist)mir()rotate([0,0,a[i]*2])
                 translate([d/2-2*w+t/2,0,0])
@@ -126,7 +126,7 @@ if(part=="shell"||part==undef){
         }
         // false teeth
         if(max([for(i=[0:len(a)-1])(3*delta[i]>4*outer_w)?1:0]))intersection(){
-            translate([0,0,w])rotate_extrude()
+            translate([0,0,wall_thickness*s])rotate_extrude()
                 polygon(points=[[0,h+(n-1)*(h+sp)+h/2],[d/2-2*w,h+(n-1)*(h+sp)+h/2],[d/2-2*w+t,t+h+(n-1)*(h+sp)+h/2],[d/2-2*w+t,box_h],[0,box_h]]);
             for(i=[0:len(gaps)-1])if(3*delta[i]>4*outer_w)
                 let(de=(delta[i]-outer_w)/outer_w/2,def=floor(de))for(j=[-def/2:def/2])
@@ -137,7 +137,7 @@ if(part=="shell"||part==undef){
         }
         // false gates
         intersection(){
-            translate([0,0,w])rotate_extrude()
+            translate([0,0,wall_thickness*s])rotate_extrude()
                 polygon(points=[[0,0],[d/2-2*w,0],[d/2-2*w+t,t],[d/2-2*w+t,box_h],[0,box_h]]);
             for (i=[0:n-1])translate([0,0,h+i*(h+sp)])rotate_extrude()
                 polygon(points=[
@@ -168,9 +168,9 @@ if(part=="shell"||part==undef){
         // magnets 
         if(magnets)for(i=[0:len(gaps)-1])if(delta[i]>magnet_d)
             let(de=(delta[i]-magnet_d/2)/magnet_d/2,def=floor(de))for(j=[-def/2:def/2])
-                rotate([0,0,-twist*(w+layer_h+magnet_d/2)/box_h])
+                rotate([0,0,-twist*(wall_thickness*s+layer_h+magnet_d/2)/box_h])
                     mir()rotate([0,0,gaps[i]+j*magnet_d/PI/(d/2-2*w)*360*(def?de/def:1)])
-                        translate([d/2-2*w+magnet_h+tol,0,w+magnet_d/2+tol])
+                        translate([d/2-2*w+magnet_h+tol,0,wall_thickness*s+magnet_d/2+tol])
                             mirror([1,0,1])cylinder(d=magnet_d+2*tol,h=magnet_h+s+2*tol,$fn=24);
         // temporary sections
         if(section){
@@ -197,18 +197,18 @@ if(part=="codex"){
 
 // Core
 if(part=="core"||part==undef){
-    translate([0,0,part=="core"?box_h:0])rotate([part=="core"?180:0,0,-twist*(w+layer_h)/box_h])difference(){
-        translate([0,0,w+layer_h]){
+    translate([0,0,part=="core"?box_h:0])rotate([part=="core"?180:0,0,-twist*(wall_thickness*s+layer_h)/box_h])difference(){
+        translate([0,0,wall_thickness*s+layer_h]){
             // cylinder
-            cylinder(d=d-4*w-4*tol,h=box_h-w-layer_h);
+            cylinder(d=d-4*w-4*tol,h=box_h-wall_thickness*s-layer_h);
             // top taper
-            translate([0,0,box_h-w-layer_h-s])cylinder(d=d-4*w+2*t+4*tol,h=s);
-            translate([0,0,box_h-w-layer_h-s-t])cylinder(d1=d-4*w-4*tol,d2=d-4*w+2*t+4*tol,h=t);
+            translate([0,0,box_h-wall_thickness*s-layer_h-s])cylinder(d=d-4*w+2*t+4*tol,h=s);
+            translate([0,0,box_h-wall_thickness*s-layer_h-s-t])cylinder(d1=d-4*w-4*tol,d2=d-4*w+2*t+4*tol,h=t);
             // outer teeth
             intersection(){
                 rotate_extrude()
                     polygon(points=[[0,2*layer_h],[d/2-2*w-2*tol,2*layer_h],[d/2-2*w-2*tol+t,t+2*layer_h],
-                [d/2-2*w-2*tol+t,box_h-taper*(w+3*layer_h+s+2*t)],[d/2-2*w-2*tol,box_h-taper*(w+3*layer_h+s+t)],[0,box_h-taper*(w+3*layer_h+s+t)]]);
+                [d/2-2*w-2*tol+t,box_h-taper*(wall_thickness*s+3*layer_h+s+2*t)],[d/2-2*w-2*tol,box_h-taper*(wall_thickness*s+3*layer_h+s+t)],[0,box_h-taper*(wall_thickness*s+3*layer_h+s+t)]]);
                 for(i=[0:len(a)-1])linear_extrude(box_h,twist=twist)
                     mir()rotate([0,0,a[i]*2])translate([d/2-2*w-2*tol+t/2,0,0])
                         square([t+2*tol,outer_w],center=true);
@@ -217,7 +217,7 @@ if(part=="core"||part==undef){
             if(max([for(i=[0:len(a)-1])(3*delta[i]>4*outer_w)?1:0]))intersection(){
                 rotate_extrude()
                     polygon(points=[[0,h+(n-1)*(h+sp)+h/2],[d/2-2*w-2*tol,h+(n-1)*(h+sp)+h/2],[d/2-2*w-2*tol+t,t+h+(n-1)*(h+sp)+h/2],
-                        [d/2-2*w-2*tol+t,box_h-w-layer_h],[d/2-2*w-2*tol,box_h-w-layer_h],[0,box_h-w-layer_h]]);
+                        [d/2-2*w-2*tol+t,box_h-wall_thickness*s-layer_h],[d/2-2*w-2*tol,box_h-wall_thickness*s-layer_h],[0,box_h-wall_thickness*s-layer_h]]);
                 for(i=[0:len(a)-1])if(3*delta[i]>4*outer_w)
                     let(de=(delta[i]-outer_w)/outer_w/2,def=floor(de))for(j=[-def/2:def/2])
                         linear_extrude(box_h,twist=twist)mir()
@@ -230,13 +230,13 @@ if(part=="core"||part==undef){
         for (i=[0:n-1])translate([0,0,h+i*(h+sp)])rotate_extrude()
             polygon(points=[[d/2,h],[d/2-4*tol,h],[d/2-t-3*tol,h-t],[d/2-t-3*tol,t],[d/2-4*tol,0],[d/2,0]]);
         // payload
-        cylinder(d=d-4*w-4*tol-2*wall_thickness*s,h=box_h-w);
+        cylinder(d=d-4*w-4*tol-2*wall_thickness*s,h=box_h-wall_thickness*s);
         // magnets 
         if(magnets)for(i=[0:len(gaps)-1])if(delta[i]>magnet_d)
             let(de=(delta[i]-magnet_d/2)/magnet_d/2,def=floor(de))for(j=[-def/2:def/2])
                 rotate([0,0,-twist*magnet_d/2/box_h])
                     mir()rotate([0,0,gaps[i]+j*magnet_d/PI/(d/2-2*w)*360*(def?de/def:1)])
-                        translate([d/2-2.5*w-tol,0,w+magnet_d/2+tol+4*layer_h])
+                        translate([d/2-2.5*w-tol,0,wall_thickness*s+magnet_d/2+tol+4*layer_h])
                             mirror([1,0,1])cylinder(d=magnet_d+2*tol,h=magnet_h+s+2*tol,$fn=24);
         // temporary sections
         if(section){
