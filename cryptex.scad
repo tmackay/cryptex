@@ -13,7 +13,7 @@ codex = 1; // [1:Yes , 0:No]
 notches = 1; // [1:Yes , 0:No]
 
 // raised dials beyond cylinder diameter
-raised_dials = 1; // [1:Yes , 0:No]
+raised_dials = 0; // [1:Yes , 0:No]
 
 // Array of characters, first character in each row is key, rest is filler in no particular order
 // watch out the seams don't give it away... (onlinerandomtools.com/shuffle-letters)
@@ -41,13 +41,18 @@ char_thickness = s*char_thickness_;
 d_ = 30;
 d=s*d_;
 
-// wall thickness
-w_ = 3.6;
-w = s*w_;
+// clearance
+tol_=0.4; //[0:0.1:1.0]
+tol=s*tol_/2;
 
-// teeth depth
-t_ = 4.8;
-t=s*t_;
+// Thickness of wall at thinnest point
+wall_thickness = 2; // [0:0.1:5]
+// Tooth overlap - how much grab the ring teeth have on the core teeth
+tooth_overlap = 2; // [0:0.1:5]
+
+// calculate wall and teeth depth from above requirements
+t = s*(wall_thickness+tooth_overlap+2*tol_);
+w = s*(wall_thickness+tooth_overlap+1.5*tol_-tooth_overlap/2);
 
 // Outer teeth
 outer_t = 3; //[0:1:24]
@@ -69,10 +74,6 @@ magnet_d = s*magnet_d_;
 // Magnet height
 magnet_h_ = 3; //[0:0.1:10]
 magnet_h = s*magnet_h_;
-
-// clearance
-tol_=0.4; //[0:0.1:1.0]
-tol=s*tol_/2;
 
 // Layer height (for ring horizontal split)
 layer_h_ = 0.2; //[0:0.01:1]
@@ -229,7 +230,7 @@ if(part=="core"||part==undef){
         for (i=[0:n-1])translate([0,0,h+i*(h+sp)])rotate_extrude()
             polygon(points=[[d/2,h],[d/2-4*tol,h],[d/2-t-3*tol,h-t],[d/2-t-3*tol,t],[d/2-4*tol,0],[d/2,0]]);
         // payload
-        cylinder(d=d-6*w-4*tol,h=box_h-w);
+        cylinder(d=d-4*w-4*tol-2*wall_thickness*s,h=box_h-w);
         // magnets 
         if(magnets)for(i=[0:len(gaps)-1])if(delta[i]>magnet_d)
             let(de=(delta[i]-magnet_d/2)/magnet_d/2,def=floor(de))for(j=[-def/2:def/2])
