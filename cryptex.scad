@@ -26,7 +26,7 @@ font = "Liberation Mono:style=Bold";
 s = 1000;
 
 // height of ring/collars
-h_ = 12.5;
+h_ = 7.5;
 h=s*h_;
 
 // thickness of spacers
@@ -38,7 +38,7 @@ char_thickness_ = 0.5;
 char_thickness = s*char_thickness_;
 
 // outer diameter of box
-d_ = 30;
+d_ = 25;
 d=s*d_;
 
 // clearance
@@ -46,18 +46,18 @@ tol_=0.4; //[0:0.1:1.0]
 tol=s*tol_/2;
 
 // Thickness of wall at thinnest point
-wall_thickness = 2; // [0:0.1:5]
+wall_thickness = 1.2; // [0:0.1:5]
 // Tooth overlap - how much grab the ring teeth have on the core teeth
-tooth_overlap = 2; // [0:0.1:5]
+tooth_overlap = 1.2; // [0:0.1:5]
 
 // calculate wall and teeth depth from above requirements
 t = s*(wall_thickness+tooth_overlap+2*tol_);
 w = s*(wall_thickness+tooth_overlap+1.5*tol_-tooth_overlap/2);
 
 // Outer teeth
-outer_t = 3; //[0:1:24]
+outer_t = 2; //[0:1:24]
 // Outer teeth
-outer_t2 = 5; //[0:1:24]
+outer_t2 = 3; //[0:1:24]
 // Width of outer teeth
 outer_w_=2.6; //[0:0.1:10]
 outer_w=s*outer_w_;
@@ -164,7 +164,7 @@ if(part=="shell"||part==undef){
         if(notches)rotate([0,0,-60])
             for (i=[0:n+1],j=[0:len(chars[i])-1])rotate([0,0,j*360/len(chars[i])-180/len(chars[i])])
                 translate([-d/2-tol-(raised_dials?h/5:0),0,h/2+i*(h+sp)-(i>0?(i>n?2*sp:sp):0)])
-                    translate([0,-tol,-h/2])cube([char_thickness+tol,2*tol,h]);
+                    translate([0,-tol,-h/2+h/6])cube([char_thickness+tol,2*tol,2*h/3]);
         // magnets 
         if(magnets)for(i=[0:len(gaps)-1])if(delta[i]>magnet_d)
             let(de=(delta[i]-magnet_d/2)/magnet_d/2,def=floor(de))for(j=[-def/2:def/2])
