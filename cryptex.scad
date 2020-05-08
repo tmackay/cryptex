@@ -110,8 +110,8 @@ if(part=="shell"||part==undef){
         // internal void
         translate([0,0,wall_thickness*s])cylinder(d=d-4*w,h=box_h);
         // top taper
-        translate([0,0,box_h-s])cylinder(d=d-2*wall_thickness*s,h=s);
-        translate([0,0,box_h-s-t])cylinder(d1=d-4*w,d2=d-2*wall_thickness*s,h=t);
+        translate([0,0,box_h-s])cylinder(d=d-4*w+8*tol+2*t,h=s);
+        translate([0,0,box_h-s-t])cylinder(d1=d-4*w,d2=d-4*w+8*tol+2*t,h=t);
         // code wheel cutout
         for (i=[0:n-1])translate([0,0,h+i*(h+sp)])rotate_extrude()
             polygon(points=[[d/2,h],[d/2-3*tol,h],[d/2-t-2*tol,h-t],[d/2-t-2*tol,t],[d/2-3*tol,0],[d/2,0],
@@ -202,8 +202,8 @@ if(part=="core"||part==undef){
             // cylinder
             cylinder(d=d-4*w-4*tol,h=box_h-wall_thickness*s-layer_h);
             // top taper
-            translate([0,0,box_h-wall_thickness*s-layer_h-s])cylinder(d=d-2*wall_thickness*s-4*tol,h=s);
-            translate([0,0,box_h-wall_thickness*s-layer_h-s-t])cylinder(d1=d-4*w-4*tol,d2=d-2*wall_thickness*s-4*tol,h=t);
+            translate([0,0,box_h-wall_thickness*s-layer_h-s])cylinder(d=d-4*w+2*t+4*tol,h=s);
+            translate([0,0,box_h-wall_thickness*s-layer_h-s-t])cylinder(d1=d-4*w-4*tol,d2=d-4*w+2*t+4*tol,h=t);
             // outer teeth
             intersection(){
                 rotate_extrude()
